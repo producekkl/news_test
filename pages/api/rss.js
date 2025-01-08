@@ -6,12 +6,12 @@ export default async function handler(req, res) {
     const xmlText = await response.text();
     const result = await parseStringPromise(xmlText);
     
-    // RSS 피드 데이터 정제
-    const items = result.rss.channel[0].item.map(item => ({
+    const items = result.rss.channel[0].item.map((item, index) => ({
       title: item.title[0],
       link: item.link[0],
       description: item.description ? item.description[0] : '',
       pubDate: item.pubDate[0],
+      imageUrl: `https://picsum.photos/seed/${index}/400/300`
     }));
 
     res.status(200).json({ items });

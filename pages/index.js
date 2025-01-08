@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { parseStringPromise } from "xml2js"; // xml2js 패키지 필요
+import Image from "next/image";
 
 export default function Home() {
   const [newsItems, setNewsItems] = useState([]);
@@ -11,7 +11,7 @@ export default function Home() {
 
   const fetchRssNews = async () => {
     try {
-      const response = await fetch('/api/rss'); // API 라우트를 통해 RSS 피드 가져오기
+      const response = await fetch('/api/rss');
       const data = await response.json();
       setNewsItems(data.items || []);
     } catch (error) {
@@ -19,7 +19,6 @@ export default function Home() {
     }
   };
 
-  // 검색 필터링
   const filteredNews = newsItems.filter((item) => {
     const searchContent = `${item.title} ${item.description}`.toLowerCase();
     return searchContent.includes(searchTerm.toLowerCase());
@@ -53,24 +52,36 @@ export default function Home() {
           {filteredNews.map((item, index) => (
             <article 
               key={index}
-              className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col"
+              className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full"
             >
-              <a href={item.link} target="_blank" rel="noopener noreferrer" className="p-4 flex flex-col h-full">
-                <div className="mb-2">
-                  <span className="text-xs px-2 py-1 bg-gray-100 rounded-full text-gray-600">
-                    경제
-                  </span>
+              <a href={item.link} target="_blank" rel="noopener noreferrer" className="flex flex-col h-full">
+                <div className="relative w-full h-48">
+                  <Image
+                    src={`https://picsum.photos/seed/${index + item.title.length}/400/300`}
+                    alt={item.title}
+                    fill
+                    className="object-cover rounded-t-lg"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    priority={index < 5} // 처음 5개 이미지는 우선 로딩
+                  />
                 </div>
-                <h2 className="text-sm font-bold mb-2 hover:text-blue-600 line-clamp-2">
-                  {item.title.replace(/\[\[CDATA\[|\]\]>/g, '')}
-                </h2>
-                <p className="text-xs text-gray-600 mb-3 line-clamp-3">
-                  {item.description || '내용 없음'}
-                </p>
-                <div className="mt-auto">
-                  <time className="text-xs text-gray-500">
-                    {new Date(item.pubDate).toLocaleDateString('ko-KR')}
-                  </time>
+                <div className="p-4 flex flex-col flex-1">
+                  <div className="mb-2">
+                    <span className="text-xs px-2 py-1 bg-gray-100 rounded-full text-gray-600">
+                      경제
+                    </span>
+                  </div>
+                  <h2 className="text-sm font-bold mb-2 hover:text-blue-600 line-clamp-2">
+                    {item.title.replace(/\[\[CDATA\[|\]\]>/g, '')}
+                  </h2>
+                  <p className="text-xs text-gray-600 mb-3 line-clamp-2">
+                    {item.description || '내용 없음'}
+                  </p>
+                  <div className="mt-auto">
+                    <time className="text-xs text-gray-500">
+                      {new Date(item.pubDate).toLocaleDateString('ko-KR')}
+                    </time>
+                  </div>
                 </div>
               </a>
             </article>
